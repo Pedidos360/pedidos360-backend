@@ -1,0 +1,35 @@
+# Orquestación del backend Pedidos360 (SDD §28-29).
+# La base de datos es un servicio cloud administrado (p. ej. AWS RDS), por lo
+# que NO se define como contenedor aquí (SDD §28); se referencia por variables
+# de entorno. El frontend vive en su propio repositorio.
+services:
+  ms-pedidos:
+    build: ./ms-pedidos
+    environment:
+      DB_URL: ${DB_URL}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+    networks:
+      - pedidos360-net
+    # No se expone públicamente: solo el BFF lo consume (SDD §29, §31).
+    expose:
+      - "8081"
+
+  bff:
+    build: ./bff
+    depends_on:
+      - ms-pedidos
+    environment:
+      AZURE_TENANT_ID: ${AZURE_TENANT_ID}
+      AZURE_CLIENT_ID: ${AZURE_CLIENT_ID}
+      AZURE_AUDIENCE: ${AZURE_AUDIENCE}
+      MS_PEDIDOS_URL: http://ms-pedidos:8081
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:5173}
+    ports:
+      - "8080:8080"
+    networks:
+      - pedidos360-net
+
+networks:
+  pedidos360-net:
+    driver: bridge

@@ -1,0 +1,25 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: bff
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Emisor (issuer) del IDaaS: tenant de Microsoft Entra ID (SDD §22).
+          # De aquí se descubre el JWKS para validar la firma.
+          issuer-uri: https://login.microsoftonline.com/${AZURE_TENANT_ID}/v2.0
+
+# Audiencia esperada del token (claim aud) — la API expuesta en Entra ID (SDD §22).
+security:
+  jwt:
+    audience: ${AZURE_AUDIENCE:api://${AZURE_CLIENT_ID}}
+  cors:
+    frontend-origin: ${FRONTEND_ORIGIN:http://localhost:5173}
+
+# URL interna del microservicio de pedidos (SDD §29).
+ms:
+  pedidos:
+    url: ${MS_PEDIDOS_URL:http://localhost:8081}
