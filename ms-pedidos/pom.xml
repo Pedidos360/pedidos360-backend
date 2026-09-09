@@ -38,11 +38,11 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- BD en memoria para las pruebas -->
+        <!-- BD en memoria para las pruebas y el perfil "local" de desarrollo -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <scope>test</scope>
+            <scope>runtime</scope>
         </dependency>
 
         <dependency>

@@ -1,0 +1,11 @@
+# Perfil "local" para desarrollo/pruebas sin una BD cloud real.
+# Uso: mvn spring-boot:run -Dspring-boot.run.profiles=local
+spring:
+  datasource:
+    url: jdbc:h2:mem:pedidos;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
