@@ -1,0 +1,16 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: ms-pedidos
+  # Conexión a la BD cloud mediante variables de entorno (SDD §20, §32).
+  # Nunca se colocan credenciales directamente en el código.
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false

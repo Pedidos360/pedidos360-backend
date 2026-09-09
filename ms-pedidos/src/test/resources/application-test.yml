@@ -1,0 +1,13 @@
+server:
+  port: 0
+
+spring:
+  # BD en memoria para las pruebas: no requiere una BD cloud real.
+  datasource:
+    url: jdbc:h2:mem:pedidos;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
