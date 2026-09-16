@@ -4,13 +4,11 @@ server:
 spring:
   application:
     name: bff
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          # Emisor (issuer) del IDaaS: tenant de Microsoft Entra ID (SDD §22).
-          # De aquí se descubre el JWKS para validar la firma.
-          issuer-uri: https://login.microsoftonline.com/${AZURE_TENANT_ID}/v2.0
+
+# Tenant de Microsoft Entra ID (SDD §22). El JwtDecoder usa esto para el JWKS
+# y para validar el issuer (acepta v1 y v2).
+azure:
+  tenant-id: ${AZURE_TENANT_ID}
 
 # Audiencia esperada del token (claim aud) — la API expuesta en Entra ID (SDD §22).
 security:
