@@ -1,0 +1,7 @@
+# Caddy obtiene automáticamente un certificado HTTPS (Let's Encrypt) para el
+# hostname público y sirve el frontend. PUBLIC_HOST se pasa por variable de
+# entorno, p.ej. 13-58-0-0.sslip.io (sslip.io resuelve a la IP embebida).
+{$PUBLIC_HOST} {
+    encode gzip
+    reverse_proxy frontend:80
+}

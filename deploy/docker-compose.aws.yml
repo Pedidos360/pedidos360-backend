@@ -1,0 +1,72 @@
+# Despliegue Pedidos360 en una sola instancia EC2 (SDD Parte 3).
+# Arranca los 3 componentes + un proxy Caddy que da HTTPS al frontend
+# (requisito de MSAL). El BFF se expone en :8090 para que AWS API Gateway
+# lo consuma. ms-pedidos usa H2 (perfil local), no requiere base de datos.
+#
+# Requiere que los repos estén clonados así (uno al lado del otro):
+#   ~/pedidos360-backend
+#   ~/pedidos360-frontend
+# y un archivo .env en esta carpeta (deploy/), ver .env.aws.example.
+
+services:
+  ms-pedidos:
+    build: ../ms-pedidos
+    environment:
+      SPRING_PROFILES_ACTIVE: local        # H2 en memoria (sin BD externa)
+    expose:
+      - "8081"                             # solo interno; no se publica
+    networks: [pedidos360-net]
+    restart: unless-stopped
+
+  bff:
+    build: ../bff
+    depends_on: [ms-pedidos]
+    environment:
+      SERVER_PORT: "8090"
+      AZURE_TENANT_ID: ${AZURE_TENANT_ID}
+      AZURE_CLIENT_ID: ${AZURE_CLIENT_ID}
+      AZURE_AUDIENCE: ${AZURE_AUDIENCE}
+      MS_PEDIDOS_URL: http://ms-pedidos:8081
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN}
+    ports:
+      - "8090:8090"                        # lo consume el API Gateway
+    networks: [pedidos360-net]
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ../../pedidos360-frontend
+      args:
+        # Las VITE_* se embeben en tiempo de build (identificadores públicos).
+        VITE_CLIENT_ID: ${VITE_CLIENT_ID}
+        VITE_TENANT_ID: ${VITE_TENANT_ID}
+        VITE_REDIRECT_URI: ${VITE_REDIRECT_URI}
+        VITE_API_URL: ${VITE_API_URL}
+        VITE_API_SCOPE: ${VITE_API_SCOPE}
+    expose:
+      - "80"                               # Caddy lo publica por HTTPS
+    networks: [pedidos360-net]
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2
+    depends_on: [frontend]
+    environment:
+      PUBLIC_HOST: ${PUBLIC_HOST}          # p.ej. 13-58-0-0.sslip.io
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [pedidos360-net]
+    restart: unless-stopped
+
+networks:
+  pedidos360-net:
+    driver: bridge
+
+volumes:
+  caddy_data:
+  caddy_config:
