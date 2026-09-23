@@ -27,6 +27,9 @@ public class JwtDecoderConfig {
     @Value("${security.jwt.audience}")
     private String audience;
 
+    @Value("${azure.client-id}")
+    private String clientId;
+
     @Bean
     public NimbusJwtDecoder jwtDecoder() {
         // El JWKS v2 del tenant sirve las claves usadas para firmar ambos tipos de token.
@@ -39,10 +42,15 @@ public class JwtDecoderConfig {
             "https://sts.windows.net/" + tenantId + "/"
         );
 
+        // Acepta la audiencia configurada y ambas formas del client-id
+        // (v1: "api://<id>", v2: "<id>").
+        List<String> validAudiences = List.of(audience, clientId, "api://" + clientId)
+            .stream().distinct().toList();
+
         OAuth2TokenValidator<Jwt> validators = new DelegatingOAuth2TokenValidator<>(
             new JwtTimestampValidator(),
             issuerValidator(validIssuers),
-            new AudienceValidator(audience)
+            new AudienceValidator(validAudiences)
         );
         decoder.setJwtValidator(validators);
         return decoder;

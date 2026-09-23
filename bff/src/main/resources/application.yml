@@ -9,6 +9,7 @@ spring:
 # y para validar el issuer (acepta v1 y v2).
 azure:
   tenant-id: ${AZURE_TENANT_ID}
+  client-id: ${AZURE_CLIENT_ID}
 
 # Audiencia esperada del token (claim aud) — la API expuesta en Entra ID (SDD §22).
 security:
